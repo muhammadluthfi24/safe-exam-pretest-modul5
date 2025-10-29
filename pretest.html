@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pretest Modul 5 – Regresi Dummy</title>
+<style>
+  :root {
+    --blue: #2563eb;
+    --lightblue: #eff6ff;
+    --gray: #f3f4f6;
+  }
+  body {
+    font-family: "Segoe UI", Inter, sans-serif;
+    background: var(--lightblue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+  .exam-window {
+    background: white;
+    width: 80%;
+    max-width: 950px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    padding: 30px;
+    overflow-y: auto;
+    height: 85vh;
+  }
+  h1 {
+    color: var(--blue);
+    text-align: center;
+    margin-top: 0;
+    font-size: 1.8rem;
+  }
+  .hidden { display: none; }
+  .question {
+    background: var(--gray);
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
+  }
+  .opts label {
+    display: block;
+    padding: 6px 10px;
+    margin: 4px 0;
+    border-radius: 8px;
+    background: white;
+    border: 1px solid #ddd;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  .opts label:hover {
+    background: #e5edff;
+    border-color: var(--blue);
+  }
+  input[type="radio"] { margin-right: 8px; }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+  }
+  .timer {
+    background: var(--blue);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1rem;
+  }
+  button {
+    background: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover { background: #1d4ed8; }
+  button:disabled { opacity: 0.6; cursor: not-allowed; }
+  .notice {
+    background: #fff6e6;
+    border-left: 6px solid #f59e0b;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+  }
+  .score {
+    text-align: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 15px;
+  }
+  .meta {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+  <div class="exam-window">
+    <h1>Pretest Modul 5 – Regresi dengan Variabel Dummy</h1>
+    <div id="entry">
+      <p class="meta">Pretest akan dibuka pada <strong>30 Oktober 2025 pukul 12.00 WIB</strong> dan berakhir pukul <strong>13.15 WIB</strong>.</p>
+      <div style="text-align:center; margin:10px 0;">
+        <input id="nim" type="text" placeholder="NIM (misal: 2300412345)" style="padding:10px; width:230px; border-radius:8px; border:1px solid #ccc;" />
+        <input id="nama" type="text" placeholder="Nama Lengkap" style="padding:10px; width:230px; border-radius:8px; border:1px solid #ccc;" />
+      </div>
+      <div style="text-align:center;">
+        <button id="startBtn">Mulai Ujian</button>
+      </div>
+      <p style="text-align:center; color:#666; margin-top:8px;">Waktu pengerjaan 20 menit • Jawaban benar tidak ditampilkan.</p>
+    </div>
+
+    <div id="quiz" class="hidden">
+      <div class="topbar">
+        <div><strong>NIM:</strong> <span id="metaNim"></span> | <strong>Nama:</strong> <span id="metaNama"></span></div>
+        <div class="timer" id="timer">--:--</div>
+      </div>
+      <div class="notice">⚠️ Jika Anda keluar dari tab atau lewat batas waktu, ujian otomatis berakhir.</div>
+      <form id="form"></form>
+      <div style="text-align:center; margin-top:15px;">
+        <button id="finishBtn">Submit dan Selesai</button>
+      </div>
+      <div id="result" class="hidden">
+        <div class="score" id="scoreText"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const TIME_LIMIT_MINUTES = 20;
+const OPEN_UTC = Date.UTC(2025, 9, 30, 5, 0, 0);
+const DEADLINE_UTC = Date.UTC(2025, 9, 30, 6, 15, 0);
+const LINK_NILAI = "https://forms.gle/AhrvsfoVB8zgi5kL6"; // ganti sesuai link kamu
+
+const questionsBase = [
+  {q:"1. Dalam analisis regresi dengan variabel dummy, jika suatu variabel kategorikal memiliki k kategori, mengapa hanya digunakan k–1 variabel dummy?",
+   opts:["A. Untuk mempercepat proses komputasi","B. Untuk menghindari bias model","C. Untuk menghindari multikolinearitas sempurna","D. Karena salah satu kategori tidak relevan","E. Agar semua kategori memiliki bobot sama"], id:"q1"},
+  {q:"2. Dalam model regresi: Jika untuk perempuan dan untuk laki-laki, maka mengukur:",
+   opts:["A. Nilai rata-rata Y untuk perempuan","B. Nilai rata-rata Y untuk laki-laki","C. Perbedaan rata-rata Y antara perempuan dan laki-laki","D. Nilai Y ketika semua X = 0","E. Nilai rata-rata Y keseluruhan"], id:"q2"},
+  {q:"3. Dalam analisis dengan R, fungsi relevel() digunakan untuk:",
+   opts:["A. Menghapus multikolinearitas antar variabel numerik","B. Menentukan variabel dependen baru","C. Mengubah urutan level pada variabel faktor sehingga referensinya berubah","D. Menstandarkan data sebelum regresi","E. Menambahkan variabel dummy secara manual"], id:"q3"},
+  {q:"4. Diketahui hasil regresi: Dengan referensi Tipe Besar, interpretasi koefisien 6.83 adalah:",
+   opts:["A. Penjualan toko Sedang 6.83 juta lebih rendah dari toko Besar","B. Penjualan toko Sedang 6.83 juta lebih tinggi dari toko Besar","C. Penjualan toko Besar 6.83 juta lebih tinggi dari toko Sedang","D. Tidak ada perbedaan signifikan antar tipe toko","E. Penjualan toko Kecil dan Sedang memiliki perbedaan 6.83 juta"], id:"q4"},
+  {q:"5. Hasil uji p-value pada koefisien dummy sebesar 0.2837 menunjukkan bahwa:",
+   opts:["A. Dummy variabel signifikan pada α = 0.05","B. Dummy variabel tidak berpengaruh signifikan terhadap Y","C. Model memiliki R² tinggi","D. Intersep signifikan secara statistik","E. Terjadi heteroskedastisitas"], id:"q5"},
+  {q:"6. Dalam regresi dengan variabel dummy di R, apa yang terjadi jika variabel kategorikal tidak didefinisikan sebagai factor?",
+   opts:["A. R akan otomatis menolak model","B. R akan memperlakukannya sebagai variabel numerik","C. R akan tetap membuat dummy otomatis","D. R akan memberikan error pada fungsi lm()","E. Nilai R² menjadi nol"], id:"q6"},
+  {q:"7. Jika hasil Multiple R-squared = 0.9649 dan Adjusted R-squared = 0.9448, hal ini berarti:",
+   opts:["A. Model menjelaskan sekitar 96% variasi data tanpa overfitting","B. Model menjelaskan 94% variasi data setelah disesuaikan jumlah prediktor","C. Model memiliki multikolinearitas tinggi","D. Model tidak signifikan secara keseluruhan","E. Model memiliki kesalahan prediksi besar"], id:"q7"},
+  {q:"8. Pada kasus regresi dengan dummy untuk variabel TipeToko (Besar, Sedang, Kecil), jika R menggunakan urutan alfabetis untuk referensi, maka:",
+   opts:["A. Referensi otomatis “Kecil”","B. Referensi otomatis “Sedang”","C. Referensi otomatis “Besar”","D. Referensi dipilih acak","E. R tidak menentukan referensi"], id:"q8"}
+];
+const answers = {q1:"C",q2:"C",q3:"C",q4:"B",q5:"B",q6:"B",q7:"B",q8:"C"};
+
+let currentNim=null,currentNama=null,timerInt=null,timeLeftSec=TIME_LIMIT_MINUTES*60,warned=false;
+
+function seededRandom(seed){let x=Math.sin(seed++)*10000;return x-Math.floor(x);}
+function shuffleArray(arr,seed){let a=arr.slice();for(let i=a.length-1;i>0;i--){let j=Math.floor(seededRandom(seed+i)*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function renderQuestions(nim){
+  const seed=parseInt(nim.replace(/\D/g,"")||1);
+  let shuffledQs=shuffleArray(questionsBase,seed);
+  const form=document.getElementById("form");form.innerHTML="";
+  shuffledQs.forEach((qq,qi)=>{
+    const wrap=document.createElement("div");wrap.className="question";
+    const qDiv=document.createElement("div");qDiv.innerHTML=`<strong>${qq.q}</strong>`;wrap.appendChild(qDiv);
+    let opts=qq.opts.map((o,i)=>({label:o,val:String.fromCharCode(65+i)}));
+    opts=shuffleArray(opts,seed+qi*11);
+    const optDiv=document.createElement("div");optDiv.className="opts";
+    opts.forEach(o=>{
+      const id=`${qq.id}_${o.val}`;
+      const lbl=document.createElement("label");
+      lbl.innerHTML=`<input type="radio" name="${qq.id}" value="${o.val}" id="${id}"> ${o.label}`;
+      optDiv.appendChild(lbl);
+    });
+    wrap.appendChild(optDiv);
+    form.appendChild(wrap);
+  });
+}
+function updateTimer(){
+  const m=Math.floor(timeLeftSec/60).toString().padStart(2,"0");
+  const s=(timeLeftSec%60).toString().padStart(2,"0");
+  document.getElementById("timer").textContent=`⏱️ ${m}:${s}`;
+}
+function startTimer(){
+  updateTimer();
+  timerInt=setInterval(()=>{
+    timeLeftSec--;updateTimer();
+    if(timeLeftSec<=0) endQuiz("Waktu habis");
+  },1000);
+}
+function getAns(){const a={};questionsBase.forEach(q=>{const c=document.querySelector(`input[name="${q.id}"]:checked`);a[q.id]=c?c.value:null;});return a;}
+function score(ans){let c=0;for(const qid in answers){if(ans[qid]===answers[qid])c++;}return c;}
+function endQuiz(reason){
+  clearInterval(timerInt);
+  document.querySelectorAll("input").forEach(e=>e.disabled=true);
+  const scr=score(getAns());
+  document.getElementById("scoreText").innerHTML=`
+    <p>NIM: <strong>${currentNim}</strong></p>
+    <p>Nama: <strong>${currentNama}</strong></p>
+    <p style="color:var(--blue);">Nilai Anda: <strong>${scr}/${questionsBase.length}</strong></p>
+    <p>(${reason})</p>
+    <p style="color:#555;">Nilai Anda telah dikirim melalui link berikut:<br>
+    <a href="${LINK_NILAI}" target="_blank">${LINK_NILAI}</a></p>`;
+  document.getElementById("result").classList.remove("hidden");
+}
+document.getElementById("startBtn").onclick=()=>{
+  const nim=document.getElementById("nim").value.trim();
+  const nama=document.getElementById("nama").value.trim();
+  if(!nim||!nama){alert("Isi NIM dan Nama.");return;}
+  const nowUTC=new Date().getTime();
+  if(nowUTC<OPEN_UTC){alert("Pretest belum dibuka. Buka pada 30 Oktober 2025 pukul 12.00 WIB.");return;}
+  if(nowUTC>DEADLINE_UTC){alert("Waktu pengerjaan sudah berakhir. Batas terakhir: 30 Oktober 2025 pukul 13.15 WIB.");return;}
+  currentNim=nim;currentNama=nama;
+  document.getElementById("metaNim").textContent=nim;
+  document.getElementById("metaNama").textContent=nama;
+  document.getElementById("entry").classList.add("hidden");
+  document.getElementById("quiz").classList.remove("hidden");
+  renderQuestions(nim);startTimer();
+};
+document.getElementById("finishBtn").onclick=()=>{if(confirm("Yakin submit?"))endQuiz("Submit manual");};
+window.addEventListener("blur",()=>{if(!warned){warned=true;alert("Anda keluar dari tab! Ujian berakhir.");endQuiz("Keluar dari tab");}});
+document.addEventListener("visibilitychange",()=>{if(document.hidden&&!warned){warned=true;alert("Anda berpindah tab! Ujian diakhiri.");endQuiz("Pindah tab");}});
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey&&e.shiftKey&&(e.key==="I"||e.key==="i"||e.key==="C"||e.key==="c"))||
+     (e.ctrlKey&&e.key==="U")||e.key==="F12"){e.preventDefault();alert("Akses developer tools dibatasi.");}
+});
+</script>
+</body>
+</html>
