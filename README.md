@@ -86,6 +86,7 @@ pretest-modul5/
 6. Gunakan browser versi terbaru (Chrome atau Edge) agar fitur keamanan berjalan dengan baik.
 7. Tidak ada penyimpanan data ke server, hasil hanya tampil di sisi pengguna (client-side).
 8. Disarankan menggunakan koneksi internet stabil untuk menghindari gangguan selama ujian.
+```
 
 ## 🪪 Copyright & License
 
