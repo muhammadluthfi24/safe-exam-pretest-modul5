@@ -97,7 +97,7 @@ pretest-modul5/
 
 Lisensi: MIT License
 
-Izin diberikan kepada siapa pun untuk menggunakan, menyalin,
+Tidak Izin diberikan kepada siapa pun untuk menggunakan, menyalin,
 memodifikasi, dan mendistribusikan proyek ini untuk tujuan
 akademik, pendidikan, atau pembelajaran, dengan syarat
 tetap mencantumkan kredit kepada pengembang asli.
